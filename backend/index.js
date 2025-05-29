@@ -9,7 +9,6 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors())
 
-// API-Football configuration for free tier
 const API_KEY = process.env.API_FOOTBALL_KEY;
 const API_HOST = process.env.API_FOOTBALL_HOST || 'v3.football.api-sports.io';
 const BASE_URL = process.env.API_FOOTBALL_URL || 'https://v3.football.api-sports.io';
@@ -27,9 +26,8 @@ const apiClient = axios.create({
     }
 });
 
-// Rate limiting middleware (free tier has strict limits)
 let lastRequestTime = 0;
-const REQUEST_INTERVAL = 1000; // 1 second between requests (adjust based on your tier)
+const REQUEST_INTERVAL = 1000; 
 
 app.use(async (req, res, next) => {
     const now = Date.now();
@@ -53,20 +51,17 @@ app.get('/health', (req, res) => {
     });
 });
 
-// Get today's matches (free tier often doesn't allow live endpoint)
 app.get('/api/matches', async (req, res) => {
     try {
-        // Get current date in YYYY-MM-DD format
         const today = new Date().toISOString().split('T')[0];
         
         const response = await apiClient.get('/fixtures', {
             params: {
                 date: today,
-                timezone: 'Europe/London' // Adjust as needed
+                timezone: 'Europe/London' 
             }
         });
-        
-        // Extract basic match info
+
         const matches = response.data.response.map(match => ({
             id: match.fixture.id,
             league: match.league.name,
@@ -90,33 +85,6 @@ app.get('/api/matches', async (req, res) => {
         res.status(500).json({
             success: false,
             message: 'Failed to fetch matches',
-            error: error.response?.data?.errors || error.message
-        });
-    }
-});
-
-// Get specific league standings (free tier usually allows this)
-app.get('/api/standings/:leagueId', async (req, res) => {
-    try {
-        const { leagueId } = req.params;
-        const { season = '2023' } = req.query; // Default to current season
-        
-        const response = await apiClient.get('/standings', {
-            params: {
-                league: leagueId,
-                season: season
-            }
-        });
-        
-        res.json({
-            success: true,
-            data: response.data.response
-        });
-    } catch (error) {
-        console.error('API Error:', error.response?.data || error.message);
-        res.status(500).json({
-            success: false,
-            message: 'Failed to fetch standings',
             error: error.response?.data?.errors || error.message
         });
     }

@@ -5,10 +5,7 @@ export const fetchFootballScores = async (page, limit) => {
   try {
     const response = await axios.get('http://localhost:3000/api/matches');
     const allMatches = response.data?.data || [];
-
-    console.log(response)
     
-    // Calculate pagination
     const startIndex = (page - 1) * limit;
     const endIndex = startIndex + limit;
     const paginatedMatches = allMatches.slice(startIndex, endIndex);
@@ -32,9 +29,8 @@ export const fetchFootballScores = async (page, limit) => {
 export const formatTimestamp = (timestamp) => {
   const date = new Date(timestamp * 1000);
   const now = new Date();
-  const diffInHours = Math.abs(now - date) / 36e5; // Convert to hours
+  const diffInHours = Math.abs(now - date) / 36e5; 
 
-  // If the match is from today
   if (date.toDateString() === now.toDateString()) {
     return date.toLocaleTimeString('en-US', {
       hour: '2-digit',
@@ -42,14 +38,12 @@ export const formatTimestamp = (timestamp) => {
       hour12: true
     });
   }
-  
-  // If match is within last 24 hours
+
   if (diffInHours < 24) {
     const hours = Math.floor(diffInHours);
     return `${hours}h ago`;
   }
   
-  // For older matches
   return date.toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -60,8 +54,7 @@ export const formatTimestamp = (timestamp) => {
 
 function formatCustomTime(timestamp, customHour = 0, customMinute = 0) {
     const date = new Date(timestamp * 1000);
-    
-    // Set custom time (12:30 in this case)
+
     date.setHours(customHour);
     date.setMinutes(customMinute);
     
